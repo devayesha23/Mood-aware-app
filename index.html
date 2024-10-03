@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood-Based Suggestions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        #suggestion {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        #suggestion iframe {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 560px;
+            height: 315px;
+        }
+        #suggestion a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Know Your Mood</h1>
+    <p>Type your thoughts below, and we'll suggest something to brighten your day!</p>
+    <form id="moodForm">
+        <textarea id="userText" rows="4" cols="50" placeholder="How are you feeling today?"></textarea><br><br>
+        <button type="submit">Analyze Mood</button>
+    </form>
+    <div id="suggestion"></div>
+
+    <script>
+        const form = document.getElementById('moodForm');
+        const suggestionDiv = document.getElementById('suggestion');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            suggestionDiv.innerHTML = 'Analyzing...';
+
+            const userText = document.getElementById('userText').value;
+            const apiKey = 'Add-your-API-Key'; // Replace with your Filestack API Key
+            const policy = 'eyJleHBpcnkiOjE3Mjc5ODU2MDAsImNhbGwiOlsicGljayIsInJlYWQiLCJzdGF0Iiwid3JpdGUiLCJ3cml0ZVVybCIsInN0b3JlIiwiY29udmVydCIsInJlbW92ZSIsImV4aWYiLCJydW5Xb3JrZmxvdyJdfQ=='; // Replace with your Filestack policy
+            const signature = '78e5ede35f914465aa7b7b3e7d733dd03a7f77c5345864a5921091a17c20f582'; // Replace with your Filestack signature
+
+            try {
+                const response = await fetch(`https://cdn.filestackcontent.com/${apiKey}/security=p:${policy},s:${signature}/text_sentiment=text:"${encodeURIComponent(userText)}"`);
+                const result = await response.json();
+                const emotions = result.emotions;
+
+                if (emotions.Positive > 0.5) {
+                    suggestPositiveContent();
+                } else if (emotions.Negative > 0.5) {
+                    suggestNegativeContent();
+                } else if (emotions.Neutral > 0.5) {
+                    suggestNeutralContent();
+                } else {
+                    suggestMixedContent();
+                }
+            } catch (error) {
+                suggestionDiv.innerHTML = 'Sorry, there was an error analyzing your mood.';
+                console.error('Error:', error);
+            }
+        });
+
+        function suggestPositiveContent() {
+            suggestionDiv.innerHTML = `
+                <p>You seem happy! Here are some uplifting suggestions:</p>
+                <ul>
+                    <li><a href="https://www.youtube.com/watch?v=lt-BgbITw6U" target="_blank">Listen to relaxing music on YouTube</a></li>
+                    <li><a href="https://www.goodnewsnetwork.org/" target="_blank">Visit the Good News Network</a></li>
+                    <li><a href="https://unsplash.com/s/photos/happy" target="_blank">Check out happy images on Unsplash</a></li>
+                </ul>
+                <iframe src="https://www.youtube.com/embed/lt-BgbITw6U" frameborder="0" allowfullscreen></iframe>
+            `;
+        }
+
+        function suggestNegativeContent() {
+            suggestionDiv.innerHTML = `
+                <p>It seems you're feeling down. Here's something to lift your spirits:</p>
+                <ul>
+                    <li><a href="https://www.youtube.com/watch?v=mD2rWEowr-w&pp=ygUJZnVubnkgY2F0" target="_blank">Watch a funny cat video on YouTube</a></li>
+                    <li><a href="https://www.ted.com/talks" target="_blank">Watch inspirational talks on TED</a></li>
+                    <li><a href="https://unsplash.com/s/photos/nature" target="_blank">Relax with beautiful nature images on Unsplash</a></li>
+                </ul>
+                <iframe src="https://www.youtube.com/embed/mD2rWEowr-w" frameborder="0" allowfullscreen></iframe>
+            `;
+        }
+
+        function suggestNeutralContent() {
+            suggestionDiv.innerHTML = `
+                <p>You're feeling neutral. Maybe try something interesting:</p>
+                <ul>
+                    <li><a href="https://www.youtube.com/watch?v=6U_XREUMOAU&pp=ygUZc29tZXRoaW5nIHN1cnByaXNpbmcgY2F0cw%3D%3D" target="_blank">Explore something surprising on YouTube</a></li>
+                    <li><a href="https://www.boredpanda.com/" target="_blank">Browse unique content on Bored Panda</a></li>
+                    <li><a href="https://unsplash.com/s/photos/interesting" target="_blank">View interesting images on Unsplash</a></li>
+                </ul>
+                <iframe src="https://www.youtube.com/embed/6U_XREUMOAU" frameborder="0" allowfullscreen></iframe>
+            `;
+        }
+
+        function suggestMixedContent() {
+            suggestionDiv.innerHTML = `
+                <p>You're feeling mixed emotions. Here are some suggestions to find balance:</p>
+                <ul>
+                    <li><a href="https://www.youtube.com/watch?v=lsroq3dzLxE&pp=ygURZ3VpZGVkIG1lZGl0YXRpb24%3D" target="_blank">Watch a guided meditation video on YouTube</a></li>
+                    <li><a href="https://www.headspace.com/" target="_blank">Try mindfulness exercises on Headspace</a></li>
+                    <li><a href="https://unsplash.com/s/photos/calming" target="_blank">Look at calming images on Unsplash</a></li>
+                </ul>
+                <iframe src="https://www.youtube.com/embed/lsroq3dzLxE" frameborder="0" allowfullscreen></iframe>
+            `;
+        }
+    </script>
+</body>
+</html>
